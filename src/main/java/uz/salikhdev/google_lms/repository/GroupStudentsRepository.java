@@ -18,4 +18,5 @@ public interface GroupStudentsRepository extends JpaRepository<GroupStudent, Lon
     @EntityGraph(attributePaths = {"group"})
     List<GroupStudent> findAllByStudent_Id(Long studentId);
 
+   List<GroupStudent> findByGroup_Id(Long  groupId);
 }

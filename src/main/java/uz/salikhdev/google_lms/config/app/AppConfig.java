@@ -25,7 +25,7 @@ public class AppConfig {
 
     private final UserRepository repository;
 
-    @Bean(name = "sender")
+    /*@Bean(name = "sender")
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("smtp.gmail.com");
@@ -40,6 +40,24 @@ public class AppConfig {
         props.put("mail.smtp.starttls.enable", "true");
        // props.put("mail.debug", "true");
 
+        return mailSender;
+    }*/
+
+    @Bean(name = "sender")
+    public JavaMailSender getJavaMailSender() {
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost("smtp.gmail.com");
+        mailSender.setPort(587);
+
+        mailSender.setUsername("formystudyjava@gmail.com");
+        mailSender.setPassword("xdgl bqeq ausm wdzj");
+
+
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        // props.put("mail.debug", "true");
         return mailSender;
     }
 

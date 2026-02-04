@@ -9,4 +9,8 @@ import java.util.Optional;
 @Repository
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
     Optional<Resource> findByKey(String key);
+
+
+
+    Optional<Resource> findByUrlAndStatusNot(String s, Resource.Status status);
 }

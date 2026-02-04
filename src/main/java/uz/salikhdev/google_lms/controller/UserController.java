@@ -54,7 +54,7 @@ public class UserController {
     }
 
     @PostMapping("/create-student")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN','CEO')")
     public ResponseEntity<SuccessResponse> createStudent(@RequestBody CreateUserRequest userRequest) {
         userService.createStudent(userRequest);
         return ResponseEntity.ok(SuccessResponse.ok("Student created successfully"));

@@ -1,16 +1,11 @@
 package uz.salikhdev.google_lms.domain.entity.academic;
 
+
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import uz.salikhdev.google_lms.domain.entity.base.BaseEntity;
 import uz.salikhdev.google_lms.domain.entity.user.User;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,8 +13,8 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "group_homework")
-public class GroupHomework extends BaseEntity {
+@Entity(name = "group_student_homework")
+public class GroupStudentHomeWork extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
@@ -27,17 +22,30 @@ public class GroupHomework extends BaseEntity {
     private Group group;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "homework_id", nullable = false)
+    @JoinColumn(name = "home_work_id", nullable = false)
     @ToString.Exclude
     private HomeWork homework;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id", nullable = false)
+    @JoinColumn(name = "student_id", nullable = false)
     @ToString.Exclude
-    private User creator;
+    private User student;
 
-    private LocalDateTime deadline;
+    @Column(name = "description")
+    String description;
 
-    private Boolean isSubmitted;
+    @Column(name = "homework_url")
+    String homeWorkUrl;
 
+    @Column(name = "score")
+    Long score;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    Status status;
+
+    public enum Status {
+        PENDING ,
+        CHECKED
+    }
 }

@@ -17,7 +17,7 @@ import uz.salikhdev.google_lms.domain.entity.base.BaseEntity;
 @NoArgsConstructor
 @ToString
 @Entity(name = "homework")
-public class Homework extends BaseEntity {
+public class HomeWork extends BaseEntity {
 
     @Column(nullable = false)
     private String title;

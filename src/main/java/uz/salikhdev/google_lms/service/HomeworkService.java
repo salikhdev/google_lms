@@ -2,19 +2,23 @@ package uz.salikhdev.google_lms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uz.salikhdev.google_lms.domain.dto.request.GroupHomeWorkAttachRequest;
 import uz.salikhdev.google_lms.domain.dto.request.HomeworkCreateRequest;
+import uz.salikhdev.google_lms.domain.dto.request.SendNotificationForHomeWorkRequest;
+import uz.salikhdev.google_lms.domain.dto.request.UpdateHomeWorkRequest;
 import uz.salikhdev.google_lms.domain.entity.academic.Group;
 import uz.salikhdev.google_lms.domain.entity.academic.GroupHomework;
-import uz.salikhdev.google_lms.domain.entity.academic.Homework;
+import uz.salikhdev.google_lms.domain.entity.academic.GroupStudent;
+import uz.salikhdev.google_lms.domain.entity.academic.HomeWork;
+import uz.salikhdev.google_lms.domain.entity.resource.Resource;
 import uz.salikhdev.google_lms.domain.entity.user.User;
 import uz.salikhdev.google_lms.exception.ConflictException;
 import uz.salikhdev.google_lms.exception.NotFoundException;
 import uz.salikhdev.google_lms.mapper.HomeworkMapper;
-import uz.salikhdev.google_lms.repository.GroupHomeworkRepository;
-import uz.salikhdev.google_lms.repository.GroupRepository;
-import uz.salikhdev.google_lms.repository.HomeworkRepository;
+import uz.salikhdev.google_lms.repository.*;
+import uz.salikhdev.google_lms.service.sender.EmailSenderService;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,9 @@ public class HomeworkService {
 
     private final HomeworkMapper homeworkMapper;
     private final HomeworkRepository homeworkRepository;
+    private final ResourceRepository resourceRepository;
+    private final EmailSenderService  emailSenderService;
+    private final GroupStudentsRepository groupStudentsRepository;
     private final GroupHomeworkRepository groupHomeworkRepository;
     private final GroupRepository groupRepository;
 
@@ -34,11 +41,11 @@ public class HomeworkService {
             throw new ConflictException("Homework with this title already exists");
         }
 
-        Homework entity = homeworkMapper.toEntity(request);
+        HomeWork entity = homeworkMapper.toEntity(request);
         homeworkRepository.save(entity);
     }
 
-    private void deleteHomework(Long homeworkId) {
+    public void deleteHomework(Long homeworkId) {
         if (!homeworkRepository.existsById(homeworkId)) {
             throw new ConflictException("Homework not found");
         }
@@ -53,23 +60,65 @@ public class HomeworkService {
 
     // ================= Group Homework ================= //
 
-    public void attachHomeworkToGroup(User creator, Long homeworkId, Long groupId, LocalDateTime deadline) {
+    public void attachHomeworkToGroup(User creator, GroupHomeWorkAttachRequest  request) {
 
-        Homework homework = homeworkRepository.findById(homeworkId)
+        HomeWork homework = homeworkRepository.findById(request.homeworkId())
                 .orElseThrow(() -> new NotFoundException("Homework not found"));
 
-        Group group = groupRepository.findById(groupId)
+        Group group = groupRepository.findById(request.groupId())
                 .orElseThrow(() -> new NotFoundException("Group not found"));
 
         GroupHomework groupHomework = GroupHomework.builder()
                 .creator(creator)
                 .homework(homework)
                 .group(group)
-                .deadline(deadline)
+                .deadline(request.deadline())
                 .isSubmitted(false)
                 .build();
 
         groupHomeworkRepository.save(groupHomework);
+
+
+        // ================= Send notification students ================= //
+      List<GroupStudent> groupStudents=groupStudentsRepository.findByGroup_Id(group.getId());
+        for (GroupStudent groupStudent1 : groupStudents ) {
+            SendNotificationForHomeWorkRequest sendNotificationForHomeWorkRequest = SendNotificationForHomeWorkRequest.builder()
+                    .teacherName(creator.getFirstName())
+                    .homeWorkTitle(homework.getTitle())
+                    .groupName(group.getName())
+                    .deadline(request.deadline())
+                    .firstName(groupStudent1.getStudent().getFirstName())
+                    .lastName(groupStudent1.getStudent().getLastName())
+                    .build();
+            emailSenderService.sendNotificationForHomework(groupStudent1.getStudent().getEmail(), sendNotificationForHomeWorkRequest);
+
+        }
+
+
     }
 
+    public void update(Long homeWorkId, UpdateHomeWorkRequest request) {
+        HomeWork homeWork= homeworkRepository.findById(homeWorkId)
+                .orElseThrow(() -> new NotFoundException("Homework not found"));
+        Resource resource =resourceRepository.findByUrlAndStatusNot(request.contentUrl(), Resource.Status.DELETED)
+                .orElseThrow(() -> new NotFoundException("Resource not found"));
+
+        if (request.maxScore() != null) {
+            homeWork.setMaxScore(request.maxScore());
+        }
+
+        if (request.title() != null) {
+            homeWork.setTitle(request.title());
+        }
+
+        if (request.description() != null) {
+            homeWork.setDescription(request.description());
+        }
+
+        if (request.contentUrl() != null) {
+            homeWork.setContentUrl(request.contentUrl());
+        }
+        homeworkRepository.save(homeWork);
+
+    }
 }
