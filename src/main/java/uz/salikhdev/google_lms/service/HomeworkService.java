@@ -61,6 +61,9 @@ public class HomeworkService {
     // ================= Group Homework ================= //
 
     public void attachHomeworkToGroup(User creator, GroupHomeWorkAttachRequest  request) {
+        if (groupHomeworkRepository.existsByHomeworkId(request.homeworkId())) {
+            throw new ConflictException("Homework has already been attached");
+        }
 
         HomeWork homework = homeworkRepository.findById(request.homeworkId())
                 .orElseThrow(() -> new NotFoundException("Homework not found"));
@@ -77,21 +80,32 @@ public class HomeworkService {
                 .build();
 
         groupHomeworkRepository.save(groupHomework);
+    }
 
 
-        // ================= Send notification students ================= //
-      List<GroupStudent> groupStudents=groupStudentsRepository.findByGroup_Id(group.getId());
+    // ================= Send notification students ================= //
+
+    public void sendHomeWorkToGroup(User creator, Long groupHomeWorkId) {
+        GroupHomework groupHomework = groupHomeworkRepository.findByIdAndIsSubmittedFalse(groupHomeWorkId)
+                .orElseThrow(()-> new NotFoundException("Group homework not found"));
+
+        if(groupHomework.getIsSubmitted().equals(false)) {
+            throw new ConflictException("Group homework has already been sent");
+        }
+        groupHomework.setIsSubmitted(true);
+        groupHomeworkRepository.save(groupHomework);
+
+      List<GroupStudent> groupStudents=groupStudentsRepository.findByGroup_Id(groupHomework.getGroup().getId());
         for (GroupStudent groupStudent1 : groupStudents ) {
             SendNotificationForHomeWorkRequest sendNotificationForHomeWorkRequest = SendNotificationForHomeWorkRequest.builder()
                     .teacherName(creator.getFirstName())
-                    .homeWorkTitle(homework.getTitle())
-                    .groupName(group.getName())
-                    .deadline(request.deadline())
+                    .homeWorkTitle(groupHomework.getHomework().getTitle())
+                    .groupName(groupHomework.getGroup().getName())
+                    .deadline(groupHomework.getDeadline())
                     .firstName(groupStudent1.getStudent().getFirstName())
                     .lastName(groupStudent1.getStudent().getLastName())
                     .build();
             emailSenderService.sendNotificationForHomework(groupStudent1.getStudent().getEmail(), sendNotificationForHomeWorkRequest);
-
         }
 
 

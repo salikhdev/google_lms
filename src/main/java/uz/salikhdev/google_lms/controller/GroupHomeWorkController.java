@@ -26,4 +26,12 @@ public class GroupHomeWorkController {
         homeworkService.attachHomeworkToGroup(user, request);
         return ResponseEntity.ok(SuccessResponse.ok("Homework attached to the group successfully"));
     }
+
+    @PostMapping("/sendHomeWork/{groupHomeWorkId}")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<?> attachHomeWork( @PathVariable Long groupHomeWorkId,
+                                            @AuthenticationPrincipal User teacher) {
+        homeworkService.sendHomeWorkToGroup(teacher, groupHomeWorkId);
+        return ResponseEntity.ok(SuccessResponse.ok("Homework have sent to the group successfully"));
+    }
 }

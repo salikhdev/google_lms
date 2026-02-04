@@ -24,7 +24,7 @@ public class GroupStudentHomeWork extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "home_work_id", nullable = false)
     @ToString.Exclude
-    private HomeWork homework;
+    private HomeWork homeWork;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)

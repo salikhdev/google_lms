@@ -31,7 +31,7 @@ public class GroupStudentsController {
     }
 
     @GetMapping("/students/{groupId}")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN','TEACHER')")
     public ResponseEntity<?> getGroupStudents(@PathVariable Long groupId) {
      return ResponseEntity.ok(groupStudentsService.getStudents(groupId));
 
