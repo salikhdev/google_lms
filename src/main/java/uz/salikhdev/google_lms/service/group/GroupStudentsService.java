@@ -1,4 +1,4 @@
-package uz.salikhdev.google_lms.service;
+package uz.salikhdev.google_lms.service.group;
 
 
 import lombok.RequiredArgsConstructor;
@@ -23,16 +23,16 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class GroupStudentsService {
+
     private final GroupStudentsRepository groupStudentsRepository;
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final UserMapper userMapper;
     private final GroupMapper groupMapper;
 
+    public void join(Long groupId, GroupStudentsRequest request) {
 
-    public void join(GroupStudentsRequest request) {
-
-        Group group = groupRepository.findById(request.groupId())
+        Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException("Group not found"));
 
         if (group.getStatus() != Group.Status.ACTIVE) {
@@ -69,6 +69,7 @@ public class GroupStudentsService {
                         .toList()
         );
     }
+
     public List<GroupResponse> getGroups(Long studentId) {
         List<GroupStudent> groupStudents = groupStudentsRepository.findAllByStudent_Id(studentId);
 

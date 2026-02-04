@@ -7,28 +7,31 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import uz.salikhdev.google_lms.domain.dto.request.GroupStudentHomeWorkCreateRequest;
 import uz.salikhdev.google_lms.domain.dto.request.GroupStudentHomeWorkFilterRequest;
 import uz.salikhdev.google_lms.domain.dto.response.SuccessResponse;
-import uz.salikhdev.google_lms.domain.entity.academic.GroupStudentHomeWork;
+import uz.salikhdev.google_lms.domain.entity.academic.HomeworkSubmit;
 import uz.salikhdev.google_lms.domain.entity.user.User;
-import uz.salikhdev.google_lms.service.GroupStudentHomeWorkService;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import uz.salikhdev.google_lms.service.homework.HomeworkSubmitsService;
 
 @RestController
-@RequestMapping("/api/group-student-homeworks")
+@RequestMapping("/api/homework-submits")
 @RequiredArgsConstructor
-@Tag(name = "GroupStudentHomeWork API")
-public class GroupStudentHomeWorkController {
-    private final GroupStudentHomeWorkService groupStudentHomeWorkService;
+@Tag(name = "HomeworkSubmit API")
+public class HomeworkSubmitController {
+
+    private final HomeworkSubmitsService homeworkSubmitsService;
 
     @PostMapping("/submit-homework")
     public ResponseEntity<?> submitHomework(@RequestBody GroupStudentHomeWorkCreateRequest request,
                                             @AuthenticationPrincipal User user) {
-        groupStudentHomeWorkService.submitHomework(request, user);
+        homeworkSubmitsService.submitHomework(request, user);
         return ResponseEntity.ok(SuccessResponse.ok("Your homework has been submitted"));
     }
 
@@ -41,7 +44,7 @@ public class GroupStudentHomeWorkController {
                                              @RequestParam(required = false) Long homeworkId,
                                              @RequestParam(required = false) Long fromScore,
                                              @RequestParam(required = false) Long toScore,
-                                             @RequestParam(required = false) GroupStudentHomeWork.Status status
+                                             @RequestParam(required = false) HomeworkSubmit.Status status
     ) {
         GroupStudentHomeWorkFilterRequest filterRequest = GroupStudentHomeWorkFilterRequest.builder()
                 .search(search)
@@ -53,7 +56,7 @@ public class GroupStudentHomeWorkController {
                 .status(status)
                 .build();
 
-        return ResponseEntity.ok(groupStudentHomeWorkService.getAllHomeWork(filterRequest));
+        return ResponseEntity.ok(homeworkSubmitsService.getAllHomeWork(filterRequest));
     }
 
     @GetMapping("/all-my-homeworks")
@@ -64,7 +67,7 @@ public class GroupStudentHomeWorkController {
                                              @RequestParam(required = false) Long homeworkId,
                                              @RequestParam(required = false) Long fromScore,
                                              @RequestParam(required = false) Long toScore,
-                                             @RequestParam(required = false) GroupStudentHomeWork.Status status,
+                                             @RequestParam(required = false) HomeworkSubmit.Status status,
                                                     @AuthenticationPrincipal User user) {
         GroupStudentHomeWorkFilterRequest filterRequest = GroupStudentHomeWorkFilterRequest.builder()
                 .search(search)
@@ -75,9 +78,7 @@ public class GroupStudentHomeWorkController {
                 .status(status)
                 .build();
 
-        return ResponseEntity.ok(groupStudentHomeWorkService.getAllStudentByHomeWork(filterRequest, user));
-
-
+        return ResponseEntity.ok(homeworkSubmitsService.getAllStudentByHomeWork(filterRequest, user));
     }
 
 

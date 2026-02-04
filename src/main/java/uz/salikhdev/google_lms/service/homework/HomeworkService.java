@@ -1,21 +1,28 @@
-package uz.salikhdev.google_lms.service;
+package uz.salikhdev.google_lms.service.homework;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.salikhdev.google_lms.domain.dto.request.GroupHomeWorkAttachRequest;
+import uz.salikhdev.google_lms.domain.dto.request.GroupHomeworkResponse;
 import uz.salikhdev.google_lms.domain.dto.request.HomeworkCreateRequest;
 import uz.salikhdev.google_lms.domain.dto.request.SendNotificationForHomeWorkRequest;
 import uz.salikhdev.google_lms.domain.dto.request.UpdateHomeWorkRequest;
+import uz.salikhdev.google_lms.domain.dto.response.HomeworkResponse;
 import uz.salikhdev.google_lms.domain.entity.academic.Group;
 import uz.salikhdev.google_lms.domain.entity.academic.GroupHomework;
 import uz.salikhdev.google_lms.domain.entity.academic.GroupStudent;
-import uz.salikhdev.google_lms.domain.entity.academic.HomeWork;
+import uz.salikhdev.google_lms.domain.entity.academic.Homework;
 import uz.salikhdev.google_lms.domain.entity.resource.Resource;
 import uz.salikhdev.google_lms.domain.entity.user.User;
 import uz.salikhdev.google_lms.exception.ConflictException;
 import uz.salikhdev.google_lms.exception.NotFoundException;
+import uz.salikhdev.google_lms.mapper.GroupHomeworkMapper;
 import uz.salikhdev.google_lms.mapper.HomeworkMapper;
-import uz.salikhdev.google_lms.repository.*;
+import uz.salikhdev.google_lms.repository.GroupHomeworkRepository;
+import uz.salikhdev.google_lms.repository.GroupRepository;
+import uz.salikhdev.google_lms.repository.GroupStudentsRepository;
+import uz.salikhdev.google_lms.repository.HomeworkRepository;
+import uz.salikhdev.google_lms.repository.ResourceRepository;
 import uz.salikhdev.google_lms.service.sender.EmailSenderService;
 
 import java.util.List;
@@ -28,6 +35,7 @@ public class HomeworkService {
     private final HomeworkRepository homeworkRepository;
     private final ResourceRepository resourceRepository;
     private final EmailSenderService  emailSenderService;
+    private final GroupHomeworkMapper groupHomeworkMapper;
     private final GroupStudentsRepository groupStudentsRepository;
     private final GroupHomeworkRepository groupHomeworkRepository;
     private final GroupRepository groupRepository;
@@ -35,13 +43,18 @@ public class HomeworkService {
 
     // ================= Homework ================= //
 
+    public List<HomeworkResponse> getAllHomeworks() {
+        List<Homework> homeworks = homeworkRepository.findAll();
+        return homeworkMapper.toResponse(homeworks);
+    }
+
     public void createHomework(HomeworkCreateRequest request) {
 
         if (homeworkRepository.existsByTitle(request.title())) {
             throw new ConflictException("Homework with this title already exists");
         }
 
-        HomeWork entity = homeworkMapper.toEntity(request);
+        Homework entity = homeworkMapper.toEntity(request);
         homeworkRepository.save(entity);
     }
 
@@ -60,15 +73,15 @@ public class HomeworkService {
 
     // ================= Group Homework ================= //
 
-    public void attachHomeworkToGroup(User creator, GroupHomeWorkAttachRequest  request) {
+    public void attachHomeworkToGroup(User creator, Long gropId, GroupHomeWorkAttachRequest request) {
         if (groupHomeworkRepository.existsByHomeworkId(request.homeworkId())) {
             throw new ConflictException("Homework has already been attached");
         }
 
-        HomeWork homework = homeworkRepository.findById(request.homeworkId())
+        Homework homework = homeworkRepository.findById(request.homeworkId())
                 .orElseThrow(() -> new NotFoundException("Homework not found"));
 
-        Group group = groupRepository.findById(request.groupId())
+        Group group = groupRepository.findById(gropId)
                 .orElseThrow(() -> new NotFoundException("Group not found"));
 
         GroupHomework groupHomework = GroupHomework.builder()
@@ -79,36 +92,35 @@ public class HomeworkService {
                 .isSubmitted(false)
                 .build();
 
-        groupHomeworkRepository.save(groupHomework);
+        GroupHomework saveGH = groupHomeworkRepository.save(groupHomework);
+        sendNotificationToStudens(saveGH);
+    }
+
+    public List<GroupHomeworkResponse> getAllAttachHomeworks(Long groupId) {
+        List<GroupHomework> gh = groupHomeworkRepository.findByGroup_Id(groupId);
+        return groupHomeworkMapper.toResponse(gh);
     }
 
 
     // ================= Send notification students ================= //
 
-    public void sendHomeWorkToGroup(User creator, Long groupHomeWorkId) {
-        GroupHomework groupHomework = groupHomeworkRepository.findByIdAndIsSubmittedFalse(groupHomeWorkId)
-                .orElseThrow(()-> new NotFoundException("Group homework not found"));
-        groupHomework.setIsSubmitted(true);
-        groupHomeworkRepository.save(groupHomework);
-
-      List<GroupStudent> groupStudents=groupStudentsRepository.findByGroup_Id(groupHomework.getGroup().getId());
-        for (GroupStudent groupStudent1 : groupStudents ) {
+    private void sendNotificationToStudens(GroupHomework groupHomework) {
+        List<GroupStudent> groupStudents = groupStudentsRepository.findAllByGroup_Id(groupHomework.getGroup().getId());
+        for (GroupStudent groupStudent : groupStudents) {
             SendNotificationForHomeWorkRequest sendNotificationForHomeWorkRequest = SendNotificationForHomeWorkRequest.builder()
-                    .teacherName(creator.getFirstName())
+                    .teacherName(groupHomework.getGroup().getMentor().getFirstName())
                     .homeWorkTitle(groupHomework.getHomework().getTitle())
                     .groupName(groupHomework.getGroup().getName())
                     .deadline(groupHomework.getDeadline())
-                    .firstName(groupStudent1.getStudent().getFirstName())
-                    .lastName(groupStudent1.getStudent().getLastName())
+                    .firstName(groupStudent.getStudent().getFirstName())
+                    .lastName(groupStudent.getStudent().getLastName())
                     .build();
-            emailSenderService.sendNotificationForHomework(groupStudent1.getStudent().getEmail(), sendNotificationForHomeWorkRequest);
+            emailSenderService.sendNotificationForHomework(groupStudent.getStudent().getEmail(), sendNotificationForHomeWorkRequest);
         }
-
-
     }
 
     public void update(Long homeWorkId, UpdateHomeWorkRequest request) {
-        HomeWork homeWork= homeworkRepository.findById(homeWorkId)
+        Homework homeWork = homeworkRepository.findById(homeWorkId)
                 .orElseThrow(() -> new NotFoundException("Homework not found"));
         Resource resource =resourceRepository.findByUrlAndStatusNot(request.contentUrl(), Resource.Status.DELETED)
                 .orElseThrow(() -> new NotFoundException("Resource not found"));
@@ -131,4 +143,6 @@ public class HomeworkService {
         homeworkRepository.save(homeWork);
 
     }
+
+
 }

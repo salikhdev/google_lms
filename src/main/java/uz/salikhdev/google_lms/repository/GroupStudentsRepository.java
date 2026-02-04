@@ -11,14 +11,10 @@ import java.util.List;
 @Repository
 public interface GroupStudentsRepository extends JpaRepository<GroupStudent, Long> {
 
-
     @EntityGraph(attributePaths = {"student"})
     List<GroupStudent> findAllByGroup_Id(Long groupId);
 
     @EntityGraph(attributePaths = {"group"})
     List<GroupStudent> findAllByStudent_Id(Long studentId);
-
-   List<GroupStudent> findByGroup_Id(Long  groupId);
-
 
 }

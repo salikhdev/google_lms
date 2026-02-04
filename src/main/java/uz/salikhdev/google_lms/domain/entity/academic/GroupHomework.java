@@ -29,7 +29,7 @@ public class GroupHomework extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "homework_id", nullable = false)
     @ToString.Exclude
-    private HomeWork homework;
+    private Homework homework;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)

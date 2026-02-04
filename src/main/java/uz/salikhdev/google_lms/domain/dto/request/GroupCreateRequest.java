@@ -1,15 +1,15 @@
 package uz.salikhdev.google_lms.domain.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Set;
 
-public record CreateGroupRequest(
+public record GroupCreateRequest(
         @NotNull(message = "Name is required")
         @NotBlank(message = "Name cannot be blank")
         String name,
@@ -31,6 +31,9 @@ public record CreateGroupRequest(
 
         @NotNull(message = "End time is required")
         LocalTime endTime,
+
+        @NotNull(message = "Days of week are required")
+        Set<DayOfWeek> daysOfWeek,
 
         @NotNull(message = "Start date is required")
         LocalDate startDate

@@ -1,21 +1,17 @@
 package uz.salikhdev.google_lms.specification;
 
 import org.springframework.data.jpa.domain.Specification;
-import uz.salikhdev.google_lms.domain.entity.academic.GroupStudentHomeWork;
-import uz.salikhdev.google_lms.domain.entity.user.User;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import uz.salikhdev.google_lms.domain.entity.academic.HomeworkSubmit;
 
 public class GroupStudentHomeWorkSpecification {
-    public static Specification<GroupStudentHomeWork> filterGroupStudentHomeWorks(
+    public static Specification<HomeworkSubmit> filterGroupStudentHomeWorks(
             String search,
             Long homeWorkId,
             Long groupId,
             Long studentId,
             Long fromScore,
             Long toScore,
-            GroupStudentHomeWork.Status status
+            HomeworkSubmit.Status status
     ) {
         return (root, query, criteriaBuilder) -> {
             var predicates = criteriaBuilder.conjunction();

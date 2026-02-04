@@ -13,11 +13,5 @@ public record GroupStudentHomeWorkCreateRequest(
         Long homeWorkId,
         @NotNull(message = "Group id cannot be null")
         Long groupId
-
-
-
-
-
-
 ) {
 }

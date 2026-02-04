@@ -2,10 +2,7 @@ package uz.salikhdev.google_lms.domain.dto.request;
 
 
 import lombok.Builder;
-import uz.salikhdev.google_lms.domain.entity.academic.GroupStudentHomeWork;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import uz.salikhdev.google_lms.domain.entity.academic.HomeworkSubmit;
 
 @Builder
 public record GroupStudentHomeWorkFilterRequest(
@@ -15,7 +12,7 @@ public record GroupStudentHomeWorkFilterRequest(
         Long groupId,
         Long fromScore,
         Long toScore,
-        GroupStudentHomeWork.Status status
+        HomeworkSubmit.Status status
 
 ) {
 }

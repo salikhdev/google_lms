@@ -30,23 +30,23 @@ public class UserService {
     private final UserMapper userMapper;
 
 
-    public void createStudent(CreateUserRequest request) {
+    public void createStudent(UserCreateRequest request) {
         createUser(request, Role.STUDENT);
     }
 
-    public void createTeacher(CreateUserRequest request) {
+    public void createTeacher(UserCreateRequest request) {
         createUser(request, Role.TEACHER);
     }
 
-    public void createAdmin(CreateUserRequest request) {
+    public void createAdmin(UserCreateRequest request) {
         createUser(request, Role.ADMIN);
     }
 
-    public void createCashier(CreateUserRequest request) {
+    public void createCashier(UserCreateRequest request) {
         createUser(request, Role.CASHIER);
     }
 
-    private void createUser(CreateUserRequest request, Role role) {
+    private void createUser(UserCreateRequest request, Role role) {
 
         if (userRepository.existsByEmail(request.email())) {
             throw new ConflictException("Email already in use");

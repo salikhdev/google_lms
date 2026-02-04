@@ -1,6 +1,8 @@
 package uz.salikhdev.google_lms.domain.entity.academic;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -18,8 +20,11 @@ import lombok.experimental.SuperBuilder;
 import uz.salikhdev.google_lms.domain.entity.base.BaseEntity;
 import uz.salikhdev.google_lms.domain.entity.user.User;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -71,6 +76,16 @@ public class Group extends BaseEntity {
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "schedule_days",
+            joinColumns = @JoinColumn(name = "group_id")
+    )
+    @Column(name = "day_of_week")
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Set<DayOfWeek> daysOfWeek = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

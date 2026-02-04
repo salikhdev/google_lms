@@ -1,8 +1,18 @@
 package uz.salikhdev.google_lms.domain.entity.academic;
 
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import uz.salikhdev.google_lms.domain.entity.base.BaseEntity;
 import uz.salikhdev.google_lms.domain.entity.user.User;
@@ -13,8 +23,8 @@ import uz.salikhdev.google_lms.domain.entity.user.User;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "group_student_homework")
-public class GroupStudentHomeWork extends BaseEntity {
+@Entity(name = "homework_submit")
+public class HomeworkSubmit extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
@@ -24,7 +34,7 @@ public class GroupStudentHomeWork extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "home_work_id", nullable = false)
     @ToString.Exclude
-    private HomeWork homeWork;
+    private Homework homeWork;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)

@@ -26,7 +26,7 @@ public class AutoService implements CommandLineRunner {
                 .lastName("Abdugafforov")
                 .birthDate(LocalDate.of(2004, 6, 12))
                 .password(encoder.encode("admin123"))
-                .role(User.Role.CEO)
+                .role(User.Role.SUPER_USER)
                 .status(User.Status.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .build();
