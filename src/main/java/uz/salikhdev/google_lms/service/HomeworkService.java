@@ -88,10 +88,6 @@ public class HomeworkService {
     public void sendHomeWorkToGroup(User creator, Long groupHomeWorkId) {
         GroupHomework groupHomework = groupHomeworkRepository.findByIdAndIsSubmittedFalse(groupHomeWorkId)
                 .orElseThrow(()-> new NotFoundException("Group homework not found"));
-
-        if(groupHomework.getIsSubmitted().equals(false)) {
-            throw new ConflictException("Group homework has already been sent");
-        }
         groupHomework.setIsSubmitted(true);
         groupHomeworkRepository.save(groupHomework);
 

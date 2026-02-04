@@ -15,9 +15,7 @@ public record GroupHomeWorkAttachRequest(
         @NotNull(message = "Group Id cannot be null")
         Long groupId,
         @NotNull(message = "Deadline is required")
-        LocalDateTime deadline,
-
-        Boolean IsSubmitted
+        LocalDateTime deadline
 
 ) {
 }
