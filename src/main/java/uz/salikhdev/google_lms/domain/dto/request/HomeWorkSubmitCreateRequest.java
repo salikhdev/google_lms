@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
-public record GroupStudentHomeWorkCreateRequest(
+public record HomeWorkSubmitCreateRequest(
         String description,
         @NotNull(message = "Homework url cannot be null")
         String homeWorkUrl,

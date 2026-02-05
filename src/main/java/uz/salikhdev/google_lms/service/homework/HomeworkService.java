@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import uz.salikhdev.google_lms.domain.dto.request.GroupHomeWorkAttachRequest;
 import uz.salikhdev.google_lms.domain.dto.request.GroupHomeworkResponse;
 import uz.salikhdev.google_lms.domain.dto.request.HomeworkCreateRequest;
-import uz.salikhdev.google_lms.domain.dto.request.SendNotificationForHomeWorkRequest;
-import uz.salikhdev.google_lms.domain.dto.request.UpdateHomeWorkRequest;
+import uz.salikhdev.google_lms.domain.dto.request.HomeWorkNotificationRequest;
+import uz.salikhdev.google_lms.domain.dto.request.HomeWorkUpdateRequest;
 import uz.salikhdev.google_lms.domain.dto.response.HomeworkResponse;
 import uz.salikhdev.google_lms.domain.entity.academic.Group;
 import uz.salikhdev.google_lms.domain.entity.academic.GroupHomework;
@@ -55,6 +55,9 @@ public class HomeworkService {
         }
 
         Homework entity = homeworkMapper.toEntity(request);
+        //--------------------------------
+        entity.setStatus(Homework.Status.PENDING);
+        //-----------------------------------
         homeworkRepository.save(entity);
     }
 
@@ -73,7 +76,7 @@ public class HomeworkService {
 
     // ================= Group Homework ================= //
 
-    public void attachHomeworkToGroup(User creator, Long gropId, GroupHomeWorkAttachRequest request) {
+    public void attachHomeworkToGroup(User creator, Long groupId, GroupHomeWorkAttachRequest request) {
         if (groupHomeworkRepository.existsByHomeworkId(request.homeworkId())) {
             throw new ConflictException("Homework has already been attached");
         }
@@ -81,7 +84,8 @@ public class HomeworkService {
         Homework homework = homeworkRepository.findById(request.homeworkId())
                 .orElseThrow(() -> new NotFoundException("Homework not found"));
 
-        Group group = groupRepository.findById(gropId)
+
+        Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException("Group not found"));
 
         GroupHomework groupHomework = GroupHomework.builder()
@@ -93,7 +97,11 @@ public class HomeworkService {
                 .build();
 
         GroupHomework saveGH = groupHomeworkRepository.save(groupHomework);
-        sendNotificationToStudens(saveGH);
+        //-------------------------------
+        homework.setStatus(Homework.Status.ACTIVE);
+        homeworkRepository.save(homework);
+        //-------------------------------
+        sendNotificationToStudents(saveGH);
     }
 
     public List<GroupHomeworkResponse> getAllAttachHomeworks(Long groupId) {
@@ -104,10 +112,10 @@ public class HomeworkService {
 
     // ================= Send notification students ================= //
 
-    private void sendNotificationToStudens(GroupHomework groupHomework) {
+    private void sendNotificationToStudents(GroupHomework groupHomework) {
         List<GroupStudent> groupStudents = groupStudentsRepository.findAllByGroup_Id(groupHomework.getGroup().getId());
         for (GroupStudent groupStudent : groupStudents) {
-            SendNotificationForHomeWorkRequest sendNotificationForHomeWorkRequest = SendNotificationForHomeWorkRequest.builder()
+            HomeWorkNotificationRequest homeWorkNotificationRequest = HomeWorkNotificationRequest.builder()
                     .teacherName(groupHomework.getGroup().getMentor().getFirstName())
                     .homeWorkTitle(groupHomework.getHomework().getTitle())
                     .groupName(groupHomework.getGroup().getName())
@@ -115,11 +123,11 @@ public class HomeworkService {
                     .firstName(groupStudent.getStudent().getFirstName())
                     .lastName(groupStudent.getStudent().getLastName())
                     .build();
-            emailSenderService.sendNotificationForHomework(groupStudent.getStudent().getEmail(), sendNotificationForHomeWorkRequest);
+            emailSenderService.sendNotificationForHomework(groupStudent.getStudent().getEmail(), homeWorkNotificationRequest);
         }
     }
 
-    public void update(Long homeWorkId, UpdateHomeWorkRequest request) {
+    public void update(Long homeWorkId, HomeWorkUpdateRequest request) {
         Homework homeWork = homeworkRepository.findById(homeWorkId)
                 .orElseThrow(() -> new NotFoundException("Homework not found"));
         Resource resource =resourceRepository.findByUrlAndStatusNot(request.contentUrl(), Resource.Status.DELETED)

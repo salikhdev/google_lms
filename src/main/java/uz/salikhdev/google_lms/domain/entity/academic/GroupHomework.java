@@ -38,6 +38,7 @@ public class GroupHomework extends BaseEntity {
 
     private LocalDateTime deadline;
 
+
     private Boolean isSubmitted;
 
 }

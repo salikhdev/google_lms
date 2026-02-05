@@ -21,7 +21,7 @@ public class StudentController {
     private final HomeworkSubmitsService homeworkSubmitsService;
 
     @GetMapping("/{studentId}/groups")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<?> getGroups(@PathVariable Long studentId) {
         return ResponseEntity.ok(groupStudentsService.getGroups(studentId));
     }

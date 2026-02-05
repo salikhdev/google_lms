@@ -16,6 +16,7 @@ import uz.salikhdev.google_lms.service.security.JwtService;
 import uz.salikhdev.google_lms.specification.UserSpecification;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +67,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void updateUser(User authUser, Long userId, UpdateUserRequest userRequest) {
+    public void updateUser(User authUser, Long userId, UserUpdateRequest userRequest) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ConflictException("User not found"));
@@ -118,15 +119,33 @@ public class UserService {
         if (user.getStatus() != User.Status.ACTIVE) {
             throw new BadRequestException("User is not active");
         }
-
+//--------------------------------------------------------
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", user.getId().toString());
-        claims.put("role", user.getRole().name());
+        List<String> roles = new ArrayList<>();
+        roles.add("ROLE_" + user.getRole().name());
+
+        // 👑 SUPER USER bo‘lsa — ham role beramiz
+        if (user.getRole().name().equals("SUPER_USER")) {
+            roles = List.of(
+                    "ROLE_SUPER_USER",
+                    "ROLE_ADMIN",
+                    "ROLE_TEACHER",
+                    "ROLE_STUDENT",
+                    "ROLE_CASHIER",
+                    "ROLE_CE0"
+            );
+        }
+
+
+        claims.put("roles", roles); // ✅ LIST bo‘lib ketadi
+        //-----------------------------------------------------------
 
         String token = jwtService.generateToken(claims, user);
 
         return new LoginResponse(token, jwtService.getExpirationTime());
     }
+
 
     public List<UserResponse> getAllUsers(UserFilterRequest filter) {
         var specification = UserSpecification.filterUsers(

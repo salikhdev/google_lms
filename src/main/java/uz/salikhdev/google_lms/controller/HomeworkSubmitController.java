@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uz.salikhdev.google_lms.domain.dto.request.GroupStudentHomeWorkCreateRequest;
-import uz.salikhdev.google_lms.domain.dto.request.GroupStudentHomeWorkFilterRequest;
+import uz.salikhdev.google_lms.domain.dto.request.HomeWorkSubmitCreateRequest;
+import uz.salikhdev.google_lms.domain.dto.request.GroupHomeworkFilterRequest;
+import uz.salikhdev.google_lms.domain.dto.request.HomeworkSubmitFilterRequest;
 import uz.salikhdev.google_lms.domain.dto.response.SuccessResponse;
 import uz.salikhdev.google_lms.domain.entity.academic.HomeworkSubmit;
 import uz.salikhdev.google_lms.domain.entity.user.User;
@@ -29,16 +30,15 @@ public class HomeworkSubmitController {
     private final HomeworkSubmitsService homeworkSubmitsService;
 
     @PostMapping("/submit-homework")
-    public ResponseEntity<?> submitHomework(@RequestBody GroupStudentHomeWorkCreateRequest request,
+    public ResponseEntity<?> submitHomework(@RequestBody HomeWorkSubmitCreateRequest request,
                                             @AuthenticationPrincipal User user) {
         homeworkSubmitsService.submitHomework(request, user);
         return ResponseEntity.ok(SuccessResponse.ok("Your homework has been submitted"));
     }
 
-
-    @GetMapping("/all-homeworks")
+    @GetMapping("/all-submitted-homeworks")
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<?> getAllHomeworks(@RequestParam(required = false) String search,
+    public ResponseEntity<?> getAllSubmittedHomeworks(@RequestParam(required = false) String search,
                                              @RequestParam(required = false) Long studentId,
                                              @RequestParam(required = false) Long groupId,
                                              @RequestParam(required = false) Long homeworkId,
@@ -46,7 +46,7 @@ public class HomeworkSubmitController {
                                              @RequestParam(required = false) Long toScore,
                                              @RequestParam(required = false) HomeworkSubmit.Status status
     ) {
-        GroupStudentHomeWorkFilterRequest filterRequest = GroupStudentHomeWorkFilterRequest.builder()
+        HomeworkSubmitFilterRequest filterRequest = HomeworkSubmitFilterRequest.builder()
                 .search(search)
                 .studentId(studentId)
                 .groupId(groupId)
@@ -59,17 +59,17 @@ public class HomeworkSubmitController {
         return ResponseEntity.ok(homeworkSubmitsService.getAllHomeWork(filterRequest));
     }
 
-    @GetMapping("/all-my-homeworks")
+    @GetMapping("/all-submitted-my-homeworks")
     @Operation(summary = "This api for students to see their homeworks")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<?> getAllStudentHomeworks(@RequestParam(required = false) String search,
+    public ResponseEntity<?> getAllStudentSubmittedHomeworks(@RequestParam(required = false) String search,
                                              @RequestParam(required = false) Long groupId,
                                              @RequestParam(required = false) Long homeworkId,
                                              @RequestParam(required = false) Long fromScore,
                                              @RequestParam(required = false) Long toScore,
                                              @RequestParam(required = false) HomeworkSubmit.Status status,
                                                     @AuthenticationPrincipal User user) {
-        GroupStudentHomeWorkFilterRequest filterRequest = GroupStudentHomeWorkFilterRequest.builder()
+        HomeworkSubmitFilterRequest filterRequest = HomeworkSubmitFilterRequest.builder()
                 .search(search)
                 .groupId(groupId)
                 .homeWorkId(homeworkId)
@@ -85,11 +85,6 @@ public class HomeworkSubmitController {
 
 
 
-   /* @PostMapping("/{studentId}")
-    @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<?> checkHomework(@PathVariable Long studentId,
-                                            @AuthenticationPrincipal User user) {}
-*/
 
 
 

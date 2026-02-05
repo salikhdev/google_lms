@@ -11,7 +11,7 @@ import uz.salikhdev.google_lms.domain.entity.academic.HomeworkSubmit;
 import java.util.List;
 
 @Repository
-public interface GroupStudentHomeWorkRepository extends JpaRepository<HomeworkSubmit, Long>, JpaSpecificationExecutor<HomeworkSubmit> {
+public interface HomeworkSubmitRepository extends JpaRepository<HomeworkSubmit, Long>, JpaSpecificationExecutor<HomeworkSubmit> {
     List<HomeworkSubmit> findByGroup_Id(Long  groupId);
 
     List<HomeworkSubmit> findAllByGroup_Id(Long groupId);

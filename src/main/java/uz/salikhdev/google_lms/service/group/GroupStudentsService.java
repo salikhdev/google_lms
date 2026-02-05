@@ -35,7 +35,7 @@ public class GroupStudentsService {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException("Group not found"));
 
-        if (group.getStatus() != Group.Status.ACTIVE) {
+        if (group.getStatus() == Group.Status.FINISHED) {
             throw new BadRequestException("Cannot join inactive group");
         }
 

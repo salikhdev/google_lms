@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import uz.salikhdev.google_lms.domain.entity.academic.Group;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -13,5 +15,5 @@ public interface GroupRepository extends JpaRepository<Group, Long>, JpaSpecific
     boolean existsByNumber(Long number);
 
 
-
+    List<Group> findByStartDateBefore(LocalDateTime now);
 }

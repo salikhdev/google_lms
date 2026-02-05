@@ -3,38 +3,46 @@ package uz.salikhdev.google_lms.service.homework;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uz.salikhdev.google_lms.domain.dto.request.GroupStudentHomeWorkCreateRequest;
-import uz.salikhdev.google_lms.domain.dto.request.GroupStudentHomeWorkFilterRequest;
+import uz.salikhdev.google_lms.domain.dto.request.HomeWorkSubmitCreateRequest;
+import uz.salikhdev.google_lms.domain.dto.request.HomeworkSubmitFilterRequest;
 import uz.salikhdev.google_lms.domain.dto.response.HomeworkSubmitResponse;
 import uz.salikhdev.google_lms.domain.entity.academic.Group;
+import uz.salikhdev.google_lms.domain.entity.academic.GroupHomework;
 import uz.salikhdev.google_lms.domain.entity.academic.Homework;
 import uz.salikhdev.google_lms.domain.entity.academic.HomeworkSubmit;
 import uz.salikhdev.google_lms.domain.entity.user.User;
 import uz.salikhdev.google_lms.exception.BadRequestException;
 import uz.salikhdev.google_lms.exception.NotFoundException;
 import uz.salikhdev.google_lms.mapper.HomeworkSubmitMapper;
-import uz.salikhdev.google_lms.repository.GroupRepository;
-import uz.salikhdev.google_lms.repository.GroupStudentHomeWorkRepository;
-import uz.salikhdev.google_lms.repository.HomeworkRepository;
-import uz.salikhdev.google_lms.repository.ResourceRepository;
-import uz.salikhdev.google_lms.specification.GroupStudentHomeWorkSpecification;
+import uz.salikhdev.google_lms.repository.*;
+import uz.salikhdev.google_lms.specification.HomeWorkSubmitSpecification;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class HomeworkSubmitsService {
-    private final GroupStudentHomeWorkRepository groupStudentHomeWorkRepository;
+    private final HomeworkSubmitRepository homeworkSubmitRepository;
     private final HomeworkSubmitMapper homeworkSubmitMapper;
     private final GroupRepository groupRepository;
+    private final GroupHomeworkRepository groupHomeworkRepository;
     private final HomeworkRepository homeworkRepository;
     private final ResourceRepository resourceRepository;
 
 
-    public void submitHomework(GroupStudentHomeWorkCreateRequest request, User student) {
-        if(groupStudentHomeWorkRepository.existsByHomeWorkUrl(request.homeWorkUrl())){
+    public void submitHomework(HomeWorkSubmitCreateRequest request, User student) {
+        if(homeworkSubmitRepository.existsByHomeWorkUrl(request.homeWorkUrl())){
            throw new BadRequestException("You already have submitted this homework");
         }
+
+        //-------------------------------------------------------------------
+        GroupHomework groupHomework = groupHomeworkRepository.findByHomework_id(request.homeWorkId())
+                .orElseThrow(()-> new NotFoundException("Group homework not found"));
+        if(groupHomework.getIsSubmitted().equals(true)){
+            throw new BadRequestException("You have already skipped the deadline time");
+        }
+        //--------------------------------------------------------------------
+
         Group group= groupRepository.findById(request.groupId())
                 .orElseThrow(()-> new NotFoundException("Group not found"));
         Homework homeWork = homeworkRepository.findById(request.homeWorkId())
@@ -50,12 +58,12 @@ public class HomeworkSubmitsService {
                 .homeWorkUrl(request.homeWorkUrl())
                 .build();
 
-        groupStudentHomeWorkRepository.save(homeworkSubmit);
+        homeworkSubmitRepository.save(homeworkSubmit);
 
     }
 
-    public List<HomeworkSubmitResponse> getAllHomeWork(GroupStudentHomeWorkFilterRequest  filter) {
-        var specification = GroupStudentHomeWorkSpecification.filterGroupStudentHomeWorks(
+    public List<HomeworkSubmitResponse> getAllHomeWork(HomeworkSubmitFilterRequest filter) {
+        var specification = HomeWorkSubmitSpecification.filterHomeworkSubmit(
                 filter.search(),
                 filter.homeWorkId(),
                 filter.groupId(),
@@ -66,12 +74,12 @@ public class HomeworkSubmitsService {
 
         );
 
-        List<HomeworkSubmit> homeWorks = groupStudentHomeWorkRepository.findAll(specification);
-        return homeworkSubmitMapper.toResponse(homeWorks);
+        List<HomeworkSubmit> homeworks = homeworkSubmitRepository.findAll(specification);
+        return homeworkSubmitMapper.toResponse(homeworks);
     }
 
-    public List<HomeworkSubmitResponse> getAllStudentByHomeWork(GroupStudentHomeWorkFilterRequest  filter, User student) {
-        var specification = GroupStudentHomeWorkSpecification.filterGroupStudentHomeWorks(
+    public List<HomeworkSubmitResponse> getAllStudentByHomeWork(HomeworkSubmitFilterRequest filter, User student) {
+        var specification = HomeWorkSubmitSpecification.filterHomeworkSubmit(
                 filter.search(),
                 filter.homeWorkId(),
                 filter.groupId(),
@@ -82,7 +90,7 @@ public class HomeworkSubmitsService {
 
         );
 
-        List<HomeworkSubmit> homeWorks = groupStudentHomeWorkRepository.findAll(specification);
+        List<HomeworkSubmit> homeWorks = homeworkSubmitRepository.findAll(specification);
         return homeworkSubmitMapper.toResponse(homeWorks);
     }
 }

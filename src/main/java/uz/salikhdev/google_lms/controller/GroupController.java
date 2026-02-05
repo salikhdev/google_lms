@@ -5,23 +5,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import uz.salikhdev.google_lms.domain.dto.request.GroupCreateRequest;
-import uz.salikhdev.google_lms.domain.dto.request.GroupHomeWorkAttachRequest;
-import uz.salikhdev.google_lms.domain.dto.request.GroupStudentsRequest;
-import uz.salikhdev.google_lms.domain.dto.request.GroupUpdateRequest;
+import org.springframework.web.bind.annotation.*;
+import uz.salikhdev.google_lms.domain.dto.request.*;
 import uz.salikhdev.google_lms.domain.dto.response.SuccessResponse;
+import uz.salikhdev.google_lms.domain.entity.academic.HomeworkSubmit;
 import uz.salikhdev.google_lms.domain.entity.user.User;
+import uz.salikhdev.google_lms.service.group.GroupHomeWorkService;
 import uz.salikhdev.google_lms.service.group.GroupService;
 import uz.salikhdev.google_lms.service.group.GroupStudentsService;
 import uz.salikhdev.google_lms.service.homework.HomeworkService;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/groups")
@@ -30,11 +25,12 @@ import uz.salikhdev.google_lms.service.homework.HomeworkService;
 public class GroupController {
 
     private final GroupService groupService;
+    private final GroupHomeWorkService groupHomeWorkService;
     private final HomeworkService homeworkService;
     private final GroupStudentsService groupStudentsService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<SuccessResponse> createGroup(
             @RequestBody GroupCreateRequest request,
             @AuthenticationPrincipal User authUser
@@ -44,7 +40,7 @@ public class GroupController {
     }
 
     @PostMapping("/{groupId}/join")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<SuccessResponse> createGroupStudents(
             @PathVariable Long groupId,
             @RequestBody GroupStudentsRequest request
@@ -54,20 +50,20 @@ public class GroupController {
     }
 
     @GetMapping("/{groupId}/students")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN','TEACHER')")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
     public ResponseEntity<?> getGroupStudents(@PathVariable Long groupId) {
         return ResponseEntity.ok(groupStudentsService.getStudents(groupId));
 
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN', 'CEO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CEO')")
     public ResponseEntity<?> allGroups() {
         return ResponseEntity.ok(groupService.getAllGroups());
     }
 
     @PatchMapping("/{groupId}")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN', 'CEO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CEO')")
     public ResponseEntity<SuccessResponse> updateGroup(@PathVariable Long groupId,
                                                        @RequestBody GroupUpdateRequest request
     ) {
@@ -76,14 +72,14 @@ public class GroupController {
     }
 
     @DeleteMapping("/{groupId}")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<?> deleteCourse(@PathVariable Long groupId) {
         groupService.delete(groupId);
         return ResponseEntity.ok(SuccessResponse.ok("Group deleted successfully"));
     }
 
     @PostMapping("/{groupId}/homeworks")
-    @PreAuthorize("hasAnyRole('SUPER_USER','TEACHER','ADMIN')")
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<?> attachHomeWork(@PathVariable Long groupId,
                                             @RequestBody GroupHomeWorkAttachRequest request,
                                             @AuthenticationPrincipal User user) {
@@ -92,9 +88,29 @@ public class GroupController {
     }
 
     @GetMapping("/{groupId}/homeworks")
-    @PreAuthorize("hasAnyRole('SUPER_USER','TEACHER','ADMIN','STUDENT')")
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN','STUDENT')")
     public ResponseEntity<?> getGroupHomeworks(@PathVariable Long groupId) {
         return ResponseEntity.ok(homeworkService.getAllAttachHomeworks(groupId));
     }
 
+
+    @GetMapping("/attached-homeworks")
+    public ResponseEntity<?> getAllAttachedHomeworks(
+                                                     @RequestParam(required = false) Long creatorId,
+                                                     @RequestParam(required = false) Long groupId,
+                                                     @RequestParam(required = false) Long homeworkId,
+                                                     @RequestParam(required = false) String fromDate,
+                                                     @RequestParam(required = false) String toDate,
+                                                     @RequestParam(required = false) Boolean isSubmitted
+                                                  ) {
+        GroupHomeworkFilterRequest filterRequest = GroupHomeworkFilterRequest.builder()
+                .groupId(groupId)
+                .creatorId(creatorId)
+                .homeworkId(homeworkId)
+                .fromDate(fromDate != null ? LocalDateTime.parse(fromDate) : null)
+                .toDate(toDate != null ? LocalDateTime.parse(toDate) : null)
+                .isSubmitted(isSubmitted)
+                .build();
+        return ResponseEntity.ok(groupHomeWorkService.getAllForTeachers(filterRequest));
+    }
 }

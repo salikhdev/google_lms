@@ -49,6 +49,21 @@ jwt:
   secret: rewfrfwtgerf345fgtrds2ewcef32wcvtby67hjuhygfxx2weedfr45t6y7hu8ijn
   expiration: 36000000
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: homework-notification-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+
+
+
 minio:
   url: http://localhost:9000
   access-key: user

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uz.salikhdev.google_lms.domain.dto.request.UserCreateRequest;
 import uz.salikhdev.google_lms.domain.dto.request.LoginRequest;
-import uz.salikhdev.google_lms.domain.dto.request.UpdateUserRequest;
+import uz.salikhdev.google_lms.domain.dto.request.UserUpdateRequest;
 import uz.salikhdev.google_lms.domain.dto.request.UserFilterRequest;
 import uz.salikhdev.google_lms.domain.dto.response.LoginResponse;
 import uz.salikhdev.google_lms.domain.dto.response.SuccessResponse;
@@ -25,7 +25,7 @@ import uz.salikhdev.google_lms.service.user.UserService;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 @Tag(name = "User API")
 public class UserController {
@@ -33,38 +33,38 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/create-admin")
-    @PreAuthorize("hasAnyRole('SUPER_USER','CEO')")
+    @PreAuthorize("hasAnyRole('CEO')")
     public ResponseEntity<SuccessResponse> createAdmin(@RequestBody UserCreateRequest userRequest) {
         userService.createAdmin(userRequest);
         return ResponseEntity.ok(SuccessResponse.ok("Admin created successfully"));
     }
 
     @PostMapping("/create-cashier")
-    @PreAuthorize("hasAnyRole('SUPER_USER','CEO')")
+    @PreAuthorize("hasAnyRole('CEO')")
     public ResponseEntity<SuccessResponse> createCashier(@RequestBody UserCreateRequest userRequest) {
         userService.createCashier(userRequest);
         return ResponseEntity.ok(SuccessResponse.ok("Cashier created successfully"));
     }
 
     @PostMapping("/create-teacher")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<SuccessResponse> createTeacher(@RequestBody UserCreateRequest userRequest) {
         userService.createTeacher(userRequest);
         return ResponseEntity.ok(SuccessResponse.ok("Teacher created successfully"));
     }
 
     @PostMapping("/create-student")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN','CEO')")
+    @PreAuthorize("hasAnyRole('ADMIN','CEO')")
     public ResponseEntity<SuccessResponse> createStudent(@RequestBody UserCreateRequest userRequest) {
         userService.createStudent(userRequest);
         return ResponseEntity.ok(SuccessResponse.ok("Student created successfully"));
     }
 
     @PatchMapping("/{userId}")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN', 'CEO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CEO')")
     public ResponseEntity<SuccessResponse> updateStudent(
             @PathVariable("userId") Long userid,
-            @RequestBody UpdateUserRequest userRequest,
+            @RequestBody UserUpdateRequest userRequest,
             @AuthenticationPrincipal User authUser
     ) {
         userService.updateUser(authUser, userid, userRequest);
@@ -77,8 +77,8 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/all")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN', 'CEO')")
+    @GetMapping()
+    @PreAuthorize("hasAnyRole('ADMIN', 'CEO')")
     public ResponseEntity<?> allUsers(@RequestParam(required = false) String search,
                                       @RequestParam(required = false) User.Status status,
                                       @RequestParam(required = false) User.Role role,

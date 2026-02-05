@@ -1,10 +1,12 @@
 package uz.salikhdev.google_lms.config.app;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -99,4 +101,6 @@ public class AppConfig {
         return username -> repository.findByEmail(username)
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }
+
+
 }

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uz.salikhdev.google_lms.domain.dto.request.HomeworkCreateRequest;
-import uz.salikhdev.google_lms.domain.dto.request.UpdateHomeWorkRequest;
+import uz.salikhdev.google_lms.domain.dto.request.HomeWorkUpdateRequest;
 import uz.salikhdev.google_lms.domain.dto.response.HomeworkResponse;
 import uz.salikhdev.google_lms.domain.dto.response.SuccessResponse;
 import uz.salikhdev.google_lms.service.homework.HomeworkService;
@@ -28,20 +28,20 @@ public class HomeworkController {
     private final HomeworkService homeworkService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER','TEACHER')")
+    @PreAuthorize("hasAnyRole('TEACHER')")
     public ResponseEntity<?> createHomeWork(@RequestBody HomeworkCreateRequest request) {
         homeworkService.createHomework(request);
         return ResponseEntity.ok(SuccessResponse.ok("Homework has been created"));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN', 'TEACHER', 'STUDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<List<HomeworkResponse>> getAllHomeWorks() {
         return ResponseEntity.ok(homeworkService.getAllHomeworks());
     }
 
     @DeleteMapping("/{homeWorkId}")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN', 'TEACHER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<?> deleteHomeWork(@PathVariable Long homeWorkId) {
         homeworkService.deleteHomework(homeWorkId);
         return ResponseEntity.ok(SuccessResponse.ok("Homework has been deleted"));
@@ -49,12 +49,13 @@ public class HomeworkController {
 
 
     @PatchMapping("/{homeWorkId}")
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN', 'TEACHER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<?> edit(@PathVariable Long homeWorkId,
-                                  @RequestBody UpdateHomeWorkRequest request){
+                                  @RequestBody HomeWorkUpdateRequest request){
         homeworkService.update(homeWorkId, request);
         return ResponseEntity.ok(SuccessResponse.ok("Homework has been updated"));
 
     }
+
 
 }

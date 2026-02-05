@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uz.salikhdev.google_lms.domain.dto.request.CourseRequest;
-import uz.salikhdev.google_lms.domain.dto.request.UpdateCourseRequest;
+import uz.salikhdev.google_lms.domain.dto.request.CourseUpdateRequest;
 import uz.salikhdev.google_lms.domain.dto.response.SuccessResponse;
 import uz.salikhdev.google_lms.service.course.CourseService;
 
@@ -28,20 +28,20 @@ public class CourseController {
 
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<?> createCourse(@RequestBody CourseRequest request) {
         courseService.create(request);
         return ResponseEntity.ok(SuccessResponse.ok("Course created successfully"));
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     public ResponseEntity<?> getAll(){
         return ResponseEntity.ok( courseService.getAll());
     }
 
     @PatchMapping("/{courseId}")
     @PreAuthorize("hasAnyRole('SUPER_USER','ADMIN')")
-    public ResponseEntity<?> updateCourse(@PathVariable Long courseId, @RequestBody UpdateCourseRequest request){
+    public ResponseEntity<?> updateCourse(@PathVariable Long courseId, @RequestBody CourseUpdateRequest request){
         courseService.update(courseId,request);
         return ResponseEntity.ok(SuccessResponse.ok("Course updated successfully"));
     }

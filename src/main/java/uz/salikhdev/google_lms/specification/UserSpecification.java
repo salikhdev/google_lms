@@ -29,15 +29,15 @@ public class UserSpecification {
                     String searchPattern = "%"+search.trim().toLowerCase()+ "%";
                     var searchPredicate = criteriaBuilder.or(
                             criteriaBuilder.like(
-                                    criteriaBuilder.lower(root.get("user").get("email")),
+                                    criteriaBuilder.lower(root.get("email")),
                                     searchPattern
                             ),
                             criteriaBuilder.like(
-                                    criteriaBuilder.lower(root.get("user").get("firstName")),
+                                    criteriaBuilder.lower(root.get("firstName")),
                                     searchPattern
                             ),
                             criteriaBuilder.like(
-                                    criteriaBuilder.lower(root.get("user").get("lastName")),
+                                    criteriaBuilder.lower(root.get("lastName")),
                                     searchPattern
                             )
                     );

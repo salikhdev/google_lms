@@ -5,15 +5,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.salikhdev.google_lms.domain.dto.request.GroupCreateRequest;
 import uz.salikhdev.google_lms.domain.dto.request.GroupUpdateRequest;
+import uz.salikhdev.google_lms.domain.dto.request.TeacherNotificationRequest;
 import uz.salikhdev.google_lms.domain.dto.response.GroupResponse;
 import uz.salikhdev.google_lms.domain.entity.academic.Course;
 import uz.salikhdev.google_lms.domain.entity.academic.Group;
+import uz.salikhdev.google_lms.domain.entity.academic.GroupHomework;
 import uz.salikhdev.google_lms.domain.entity.user.User;
 import uz.salikhdev.google_lms.exception.NotFoundException;
 import uz.salikhdev.google_lms.mapper.GroupMapper;
 import uz.salikhdev.google_lms.repository.CourseRepository;
 import uz.salikhdev.google_lms.repository.GroupRepository;
 import uz.salikhdev.google_lms.repository.UserRepository;
+import uz.salikhdev.google_lms.service.sender.EmailSenderService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +29,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
+    private final EmailSenderService emailSenderService;
     private final GroupMapper groupMapper;
     private final Random random;
 
@@ -65,8 +69,21 @@ public class GroupService {
             group.setStatus(Group.Status.ACTIVE);
         }
 
-        groupRepository.save(group);
+        Group saveG = groupRepository.save(group);
+        sendNotificationToTeacher(saveG);
     }
+    private void sendNotificationToTeacher(Group group) {
+        TeacherNotificationRequest request = TeacherNotificationRequest.builder()
+                .groupName(group.getName())
+                .firstName(group.getMentor().getFirstName())
+                .lastName(group.getMentor().getLastName())
+                .groupNumber(group.getNumber())
+                .build();
+        emailSenderService.sendNotificationForTeacher(group.getMentor().getEmail(), request);
+    }
+
+
+
 
     public List<GroupResponse> getAllGroups() {
         List<Group> groups = groupRepository.findAll();

@@ -1,5 +1,6 @@
 package uz.salikhdev.google_lms.config.security;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +10,7 @@ import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,8 +21,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import tools.jackson.databind.ObjectMapper;
 import uz.salikhdev.google_lms.domain.dto.response.ErrorResponse;
 import uz.salikhdev.google_lms.service.security.JwtService;
+import io.jsonwebtoken.Claims;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.List;
+
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @AllArgsConstructor
@@ -54,16 +61,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (userPhoneNumber != null && authentication == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userPhoneNumber);
 
+
+               // ___________________________________________________
                 if (jwtService.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
+
+                    Claims claims = jwtService.extractAllClaims(jwt);
+
+                    List<String> roles = claims.get("roles", List.class);
+
+                    List<SimpleGrantedAuthority> authorities = roles.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .toList();
+
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    authorities   // ✅ endi JWT ichidan keladi
+                            );
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
+               // _________________________________________________________
+
             }
 
             filterChain.doFilter(request, response);

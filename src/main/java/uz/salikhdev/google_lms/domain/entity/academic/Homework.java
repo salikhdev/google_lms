@@ -28,4 +28,12 @@ public class Homework extends BaseEntity {
     @Column(name = "max_score", nullable = false)
     private Long maxScore;
 
+    @Column(name = "status")
+    private Status status;
+
+    public enum Status {
+        ACTIVE,
+        PENDING
+    }
+
 }

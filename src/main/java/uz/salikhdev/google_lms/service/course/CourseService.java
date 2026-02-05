@@ -4,7 +4,7 @@ package uz.salikhdev.google_lms.service.course;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.salikhdev.google_lms.domain.dto.request.CourseRequest;
-import uz.salikhdev.google_lms.domain.dto.request.UpdateCourseRequest;
+import uz.salikhdev.google_lms.domain.dto.request.CourseUpdateRequest;
 import uz.salikhdev.google_lms.domain.dto.response.CourseResponse;
 import uz.salikhdev.google_lms.domain.entity.academic.Course;
 import uz.salikhdev.google_lms.exception.BadRequestException;
@@ -37,7 +37,7 @@ public class CourseService {
         return courseMapper.toResponse(courses);
     }
 
-    public void update(Long courseId, UpdateCourseRequest request) {
+    public void update(Long courseId, CourseUpdateRequest request) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new NotFoundException("Course not found"));
 

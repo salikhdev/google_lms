@@ -3,8 +3,8 @@ package uz.salikhdev.google_lms.specification;
 import org.springframework.data.jpa.domain.Specification;
 import uz.salikhdev.google_lms.domain.entity.academic.HomeworkSubmit;
 
-public class GroupStudentHomeWorkSpecification {
-    public static Specification<HomeworkSubmit> filterGroupStudentHomeWorks(
+public class HomeWorkSubmitSpecification {
+    public static Specification<HomeworkSubmit> filterHomeworkSubmit(
             String search,
             Long homeWorkId,
             Long groupId,

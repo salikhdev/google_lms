@@ -6,7 +6,7 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record SendNotificationForHomeWorkRequest(
+public record HomeWorkNotificationRequest(
         String groupName,
         String firstName,
         String lastName,
