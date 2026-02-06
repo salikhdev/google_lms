@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import uz.salikhdev.google_lms.domain.entity.academic.HomeworkSubmit;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface HomeworkSubmitRepository extends JpaRepository<HomeworkSubmit, Long>, JpaSpecificationExecutor<HomeworkSubmit> {
@@ -21,4 +22,12 @@ public interface HomeworkSubmitRepository extends JpaRepository<HomeworkSubmit, 
     @Override
     @NonNull
     List<HomeworkSubmit> findAll(Specification<HomeworkSubmit> spec);
+
+    @Override
+    Optional<HomeworkSubmit> findById(Long id);
+
+
+
+
+
 }

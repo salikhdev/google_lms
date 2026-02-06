@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uz.salikhdev.google_lms.domain.dto.request.HomeWorkSubmitCreateRequest;
 import uz.salikhdev.google_lms.domain.dto.request.GroupHomeworkFilterRequest;
+import uz.salikhdev.google_lms.domain.dto.request.HomeworkSubmitCheckRequest;
 import uz.salikhdev.google_lms.domain.dto.request.HomeworkSubmitFilterRequest;
 import uz.salikhdev.google_lms.domain.dto.response.SuccessResponse;
 import uz.salikhdev.google_lms.domain.entity.academic.HomeworkSubmit;
@@ -36,7 +37,7 @@ public class HomeworkSubmitController {
         return ResponseEntity.ok(SuccessResponse.ok("Your homework has been submitted"));
     }
 
-    @GetMapping("/all-submitted-homeworks")
+    @GetMapping()
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<?> getAllSubmittedHomeworks(@RequestParam(required = false) String search,
                                              @RequestParam(required = false) Long studentId,
@@ -59,7 +60,7 @@ public class HomeworkSubmitController {
         return ResponseEntity.ok(homeworkSubmitsService.getAllHomeWork(filterRequest));
     }
 
-    @GetMapping("/all-submitted-my-homeworks")
+    @GetMapping("/my")
     @Operation(summary = "This api for students to see their homeworks")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> getAllStudentSubmittedHomeworks(@RequestParam(required = false) String search,
@@ -80,6 +81,15 @@ public class HomeworkSubmitController {
 
         return ResponseEntity.ok(homeworkSubmitsService.getAllStudentByHomeWork(filterRequest, user));
     }
+
+    @PostMapping("/check")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<?> check(@RequestBody HomeworkSubmitCheckRequest request,
+                                   @AuthenticationPrincipal User authUser) {
+        homeworkSubmitsService.checkHomework(request, authUser);
+        return ResponseEntity.ok(SuccessResponse.ok("Homework has been checked successfully"));
+    }
+
 
 
 

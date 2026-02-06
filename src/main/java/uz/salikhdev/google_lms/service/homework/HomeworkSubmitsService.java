@@ -4,6 +4,7 @@ package uz.salikhdev.google_lms.service.homework;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.salikhdev.google_lms.domain.dto.request.HomeWorkSubmitCreateRequest;
+import uz.salikhdev.google_lms.domain.dto.request.HomeworkSubmitCheckRequest;
 import uz.salikhdev.google_lms.domain.dto.request.HomeworkSubmitFilterRequest;
 import uz.salikhdev.google_lms.domain.dto.response.HomeworkSubmitResponse;
 import uz.salikhdev.google_lms.domain.entity.academic.Group;
@@ -18,6 +19,7 @@ import uz.salikhdev.google_lms.repository.*;
 import uz.salikhdev.google_lms.specification.HomeWorkSubmitSpecification;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -93,4 +95,16 @@ public class HomeworkSubmitsService {
         List<HomeworkSubmit> homeWorks = homeworkSubmitRepository.findAll(specification);
         return homeworkSubmitMapper.toResponse(homeWorks);
     }
+
+    public void checkHomework(HomeworkSubmitCheckRequest request, User authUser) {
+        if(authUser.getRole() != User.Role.TEACHER){
+            throw new BadRequestException("You are not Teacher");
+        }
+        HomeworkSubmit homeworkSubmit = homeworkSubmitRepository.findById(request.homeworkSubmitId())
+                .orElseThrow(()-> new NotFoundException("Homework submit not found"));
+                homeworkSubmit.setScore(request.score());
+                homeworkSubmit.setStatus(HomeworkSubmit.Status.CHECKED);
+                homeworkSubmitRepository.save(homeworkSubmit);
+    }
 }
+

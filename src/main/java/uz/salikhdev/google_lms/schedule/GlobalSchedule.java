@@ -62,33 +62,10 @@ public class GlobalSchedule {
             groupRepository.save(group);
         }
     }
-
-
-
-
 }
 
 
 
 
-   /* @Transactional
-    @Scheduled(fixedDelay = 20_000, initialDelay = 20_000)
-    public void creditWithdrawSchedular() {
 
-
-    @Transactional
-    @Scheduled(fixedDelay = 60_000, initialDelay = 60_000)
-    public void unPaidRepaymentsSchedular() {
-
-    }
-
-    @Transactional
-    @Scheduled(fixedDelay = 20_000, initialDelay = 20_000)
-    public void depositWithdrawalSchedular() {
-
-
-
-
-
-}*/
 
